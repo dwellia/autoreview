@@ -11,6 +11,7 @@
  */
 
 import { generateReviewDraft } from '../lib/review-generator.js';
+import { getReservationTranscript } from '../lib/hospitable-client.js';
 import { sendOwnerSMS } from '../lib/sms-sender.js';
 import { verifyHospitableSignature } from '../lib/webhook-auth.js';
 
@@ -68,16 +69,25 @@ export default async function handler(req, res) {
     checkOut:     data.reservation?.check_out || data.check_out,
   };
 
+  // Fetch guest conversation for personalization
+  const reservationId = data.reservation?.id;
+  const transcript = await getReservationTranscript(reservationId);
+  if (transcript) {
+    console.log('Fetched conversation transcript for personalization');
+  } else {
+    console.log('No transcript available — generating generic review');
+  }
+
   // Generate review draft via Claude
   let reviewDraft;
   try {
-    reviewDraft = await generateReviewDraft(guestInfo);
+    reviewDraft = await generateReviewDraft(guestInfo, transcript);
   } catch (err) {
     console.error('Failed to generate review draft:', err);
     return res.status(500).json({ error: 'Review generation failed' });
   }
 
-  const vrboReviewDashboardUrl = 'https://www.vrbo.com/owner/reviews';
+  const vrboReviewDashboardUrl = 'https://www.vrbo.com/supply/reviews/post-stay-reviews';
   const smsBody = buildSMSMessage(guestInfo, reviewDraft, vrboReviewDashboardUrl);
 
   try {
