@@ -34,6 +34,7 @@ export default async function handler(req, res) {
 
   const event = req.body;
   console.log('Received Hospitable event:', event?.event_type, event?.booking?.id);
+  console.log('FULL PAYLOAD:', JSON.stringify(req.body, null, 2));
 
   // Only process checkout events
   if (event?.event_type !== 'booking.checkout') {
