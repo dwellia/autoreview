@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "functions": {
+    "api/checkout-webhook.js": {
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/checkout-webhook",
+      "dest": "/api/checkout-webhook.js"
+    }
+  ]
+}
