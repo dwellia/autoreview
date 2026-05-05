@@ -34,7 +34,9 @@ export default async function handler(req, res) {
 
   // Only process checkout events
   // Hospitable v2 uses "reservation.checkout" as the action
-  if (!action?.includes('checkout')) {
+  // NOTE: "review.created" is allowed temporarily for end-to-end testing — remove after confirmed working
+  const isCheckout = action?.includes('checkout') || action === 'review.created';
+  if (!isCheckout) {
     return res.status(200).json({ message: `Action "${action}" is not a checkout — skipping` });
   }
 
@@ -44,7 +46,8 @@ export default async function handler(req, res) {
 
   // Only process VRBO bookings (Hospitable uses "homeaway" for VRBO)
   const platform = (data.platform || '').toLowerCase();
-  const isVRBO   = platform === 'homeaway';
+  // NOTE: 'airbnb' allowed temporarily for testing — remove after confirmed working
+  const isVRBO   = platform === 'homeaway' || platform === 'airbnb';
 
   if (!isVRBO) {
     console.log(`Platform "${data.platform}" is not VRBO — skipping`);
